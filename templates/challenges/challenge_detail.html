@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %} {{ challenge.title }}{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="/static/css/challenges/detail.css"/>
+{% endblock %}
+{% block body %}
+    <h4 class="page-title">CHALLENGES</h4>
+    <div class="valign-wrapper row">
+        <h5 class="col s9 page-title">[{{ challenge.get_category_display | upper }}] {{ challenge.title | upper}}</h5>
+        <a class="col s3 valign right-align modal-trigger" href="#solvers">
+            {{ challenge.solvers.count }} Solver{{ challenge.solvers.count|pluralize }}
+        </a>
+        <div id="solvers" class="modal">
+            <div class="modal-content">
+                <h4>Solver of {{ challenge.title|upper }}</h4>
+                <div class="row">
+                {% for solver in challenge.solvers.all %}
+                    <div class="col s6"><a href="{% url 'accounts:user_view' solver.pk %}">{{ solver.name }}</a></div>
+                {% endfor %}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#!" class="modal-action modal-close btn-flat">Close</a>
+            </div>
+        </div>
+    </div>
+    <blockquote>{{ challenge.description }}</blockquote>
+    {% if challenge.file %}
+        <p>File: <a href="{{ challenge.file.url }}">{{ challenge.file }}</a></p>
+    {% endif %}
+    <hr/>
+    {% if request.user in challenge.solvers.all %}
+        <p>You solved this challenge.</p>
+    {% else %}
+        <form method="POST">
+            <div class="row">
+                <div class="input-field col s12">
+                    {% if error %}
+                        <input id="answer" class="invalid" type="text" maxlength="64" name="answer" value="{{ value }}" placeholder="Input Key">
+                    {% else %}
+                        <input id="answer" type="text" maxlength="64" name="answer" placeholder="Input Key">
+                    {% endif %}
+                    {% if error %}
+                        <p class="red-text">{{ error }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            <button type="submit" class="btn blue-grey right">Submit</button>
+            {% csrf_token %}
+        </form>
+    {% endif %}
+{% endblock %}
+{% block script %}
+    <script type="text/javascript">
+        $(document).ready(function(){
+            // the "href" attribute of .modal-trigger must specify the modal ID that wants to be triggered
+            $('.modal-trigger').leanModal();
+        });
+    </script>
+
+{% endblock %}

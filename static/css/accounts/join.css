@@ -1,0 +1,10 @@
+#root {
+    margin-top: 50px;
+}
+form {
+    margin: 20px;
+}
+ul.errorlist {
+    margin-top: -10px;
+    margin-bottom: 10px;
+}

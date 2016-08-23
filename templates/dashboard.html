@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Dashboard{% endblock %}
+{% block head %}
+{% endblock %}
+{% block body %}
+    <h4 class="page-title">DASHBOARD</h4>
+    <h5 class="page-title">NEW POST</h5>
+    <ul>
+    {% for post in posts %}
+        <li><a href="{% url 'notice' post.pk %}">{{ post.title }}</a> was posted {{ post.created_at|naturaltime }}.</li>
+    {% endfor %}
+    </ul>
+    <h5 class="page-title">NEW CHALLENGES</h5>
+    <ul>
+    {% for challenge in challenges %}
+        <li><a href="{% url 'challenge' challenge.pk %}">{{ challenge.title }}</a> was released {{ challenge.created_at|naturaltime }}.</li>
+    {% endfor %}
+    </ul>
+{% endblock %}

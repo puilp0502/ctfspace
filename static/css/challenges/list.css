@@ -1,0 +1,27 @@
+div .prob {
+    width: 160px;
+    margin: 15px;
+}
+.prob p {
+    margin: 10px;
+}
+.prob-title {
+    font-size: 1.3em;
+}
+.prob-category {
+    color: #000000;
+    font-family: 'Orbitron', monospace;
+}
+.prob-score {
+    color: #000000;
+}
+.tabs .tab a {
+    font-family: 'Orbitron', monospace;
+    color: #607d8b;
+}
+.tabs .tab a:hover {
+    color: #b0bec5;
+}
+.tabs .indicator{
+    background-color: #607d8b;
+}

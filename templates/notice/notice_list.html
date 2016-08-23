@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Notices{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="/static/css/notice/list.css">
+{% endblock %}
+{% block body %}
+    <h4 class="page-title">N0TICE</h4>
+    {% if object_list %}
+        <table class="bordered">
+    {% for notice in object_list %}
+
+        <tr>
+        <td class="col s9">
+            <a class="black-text" href="{% url 'notice' notice.pk %}">
+                {{ notice.title }}
+            </a>
+        </td>
+        <td class="col s3 right">{{ notice.created_at | date:'Y.m.d H:i' }}</td>
+            </a>
+        </tr>
+        </a>
+    {% endfor %}
+        </table>
+    {% else %}
+    No Notification
+    {% endif %}
+{% endblock %}

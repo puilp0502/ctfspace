@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Ranking{% endblock %}
+{% block head %}
+{% endblock %}
+{% block body %}
+    <h4 class="page-title">RANKING</h4>
+    <table>
+    <thead>
+        <tr>
+            <th>Ranking</th>
+            <th>User</th>
+            <th>Score</th>
+        </tr>
+    </thead>
+    {% for user in users %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ user.name }}</td>
+            <td>{% if user.score %}{{ user.score }}{% else %}0{% endif %}</td>
+        </tr>
+    {% endfor %}
+    </table>
+{% endblock %}

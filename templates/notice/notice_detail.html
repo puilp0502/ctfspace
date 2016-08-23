@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Notices{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="/static/css/notice/detail.css">
+{% endblock %}
+{% block body %}
+    <h4 class="page-title">N0TICE</h4>
+    <div class="row valign-wrapper">
+        <div class="col s9 valign">
+            <h5>{{ object.title }}</h5>
+        </div>
+        <div class="col s3 right right-align valign">
+            {{ object.created_at|date:'Y.m.d H:i' }}
+        </div>
+    </div>
+    <hr/>
+    <div class="row contents">
+        <div class="col s12 text">
+            {{ object.contents|safe }}
+        </div>
+    </div>
+{% endblock %}

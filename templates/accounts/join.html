@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Join {% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="/static/css/accounts/join.css"/>
+{% endblock %}
+{% block body %}
+<div class="row" id="root">
+<div class="col s10 m8 l6 offset-s1 offset-m2 offset-l3 z-depth-1">
+<form method="POST">
+<h4 class="grey-text text-darken-2 hack-font">J0IN</h4>
+    <div class="row">
+        {% for field in form %}
+            <div class="input-field col s12">
+            {{ field }}
+            {{ field.label_tag }}
+            <div class="deep-orange-text text-darken-3">
+            {{ field.errors }}
+            </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% csrf_token %}
+    {% if request.GET.next %}
+    <input type="hidden" name="next" value="{{ request.GET.next }}"/>
+    {% endif %}
+    <div class="deep-orange-text text-darken-3">
+    {{ form.non_field_errors }}
+    </div>
+    <div class="row">
+        <div class="col s12">
+            <button class="btn-flat right" type="submit">JOIN</button>
+        </div>
+    </div>
+</form>
+</div>
+</div>
+{% endblock %}
+{% block script %}
+    <script type="text/javascript">
+    $(document).ready(function(){
+        $('select').material_select();
+    })
+    </script>
+{% endblock %}
