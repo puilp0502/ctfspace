@@ -9,21 +9,32 @@ from accounts.models import User
 
 
 def ranking(request):
-    age_group = request.GET.get('age', None)
-    if age_group is None:
+    age_group = int(request.GET.get('age', 0))
+    if age_group == 0:
         qs = User.objects
     else:
         qs = User.objects.filter(age_type=age_group)
-    users = qs\
-        .annotate(score=RawSQL("""(
-            COALESCE((SELECT SUM("challenges_challenge"."score") FROM "challenges_challenge"
-            WHERE "challenges_challenge"."id" IN
-            (SELECT "challenges_challenge_solvers"."challenge_id" FROM "challenges_challenge_solvers"
-            WHERE "challenges_challenge_solvers"."user_id" = "accounts_user"."id")), 0) +
-            COALESCE((SELECT SUM("challenges_challenge"."breakthrough_score") FROM "challenges_challenge"
-            WHERE "challenges_challenge"."breakthrough_solver_id" = "accounts_user"."id"), 0))""", ()))\
-        .order_by('-score')  # TODO: Subquery->Join
-    return render(request, 'ranking.html', {'users': users, 'age_group': age_group})
+    if age_group == 3:
+        users = qs\
+            .annotate(score=RawSQL("""(
+                COALESCE((SELECT SUM("challenges_challenge"."original_score") FROM "challenges_challenge"
+                WHERE "challenges_challenge"."id" IN
+                (SELECT "challenges_challenge_solvers"."challenge_id" FROM "challenges_challenge_solvers"
+                WHERE "challenges_challenge_solvers"."user_id" = "accounts_user"."id")), 0) +
+                COALESCE((SELECT SUM("challenges_challenge"."breakthrough_score") FROM "challenges_challenge"
+                WHERE "challenges_challenge"."breakthrough_solver_id" = "accounts_user"."id"), 0))""",()))
+    else:
+        users = qs\
+            .annotate(score=RawSQL("""(
+                COALESCE((SELECT SUM("challenges_challenge"."score") FROM "challenges_challenge"
+                WHERE "challenges_challenge"."id" IN
+                (SELECT "challenges_challenge_solvers"."challenge_id" FROM "challenges_challenge_solvers"
+                WHERE "challenges_challenge_solvers"."user_id" = "accounts_user"."id")), 0) +
+                COALESCE((SELECT SUM("challenges_challenge"."breakthrough_score") FROM "challenges_challenge"
+                WHERE "challenges_challenge"."breakthrough_solver_id" = "accounts_user"."id"), 0))""", ()))\
+            
+    users = users.order_by('-score')  # TODO: Subquery->Join
+    return render(request, 'ranking.html', {'users': users, 'age_group': age_group, 'age_types': User.Age.CHOICES[:3], 'current_age': age_group})
 
 
 class ChallengeListView(ListView):
