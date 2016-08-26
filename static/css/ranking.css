@@ -1,0 +1,18 @@
+.tabs .tab a {
+    color: #607d8b;
+}
+.tabs .tab a:hover {
+    color: #b0bec5;
+}
+.tabs .indicator{
+    background-color: #607d8b;
+}
+.num {
+    width: 25%;
+}
+.name {
+    width: 50%;
+}
+.score {
+    width: 25%;
+}
