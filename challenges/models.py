@@ -78,3 +78,10 @@ def update_score(sender, **kwargs):
                 instance.save()
 
 m2m_changed.connect(update_score, sender=Challenge.solvers.through)
+
+
+class SolveLog(models.Model):
+    solved_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    challenge = models.ForeignKey(Challenge, on_delete=models.SET_NULL, null=True)
+    ip = models.GenericIPAddressField()

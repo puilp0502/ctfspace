@@ -4,7 +4,7 @@ from django.shortcuts import render, get_object_or_404
 from django.views.generic import DetailView
 from django.views.generic import ListView
 
-from .models import Challenge
+from .models import Challenge, SolveLog
 from accounts.models import User
 
 
@@ -32,8 +32,8 @@ def ranking(request):
                 WHERE "challenges_challenge_solvers"."user_id" = "accounts_user"."id")), 0) +
                 COALESCE((SELECT SUM("challenges_challenge"."breakthrough_score") FROM "challenges_challenge"
                 WHERE "challenges_challenge"."breakthrough_solver_id" = "accounts_user"."id"), 0))""", ()))\
-            
-    users = users.order_by('-score')  # TODO: Subquery->Join
+            # TODO: Subquery->Join
+    users = users.order_by('-score').order_by('-solve_log__solved_at')  
     return render(request, 'ranking.html', {'users': users, 'age_group': age_group, 'age_types': User.Age.CHOICES[:3], 'current_age': age_group})
 
 
@@ -57,10 +57,20 @@ class ChallengeListView(ListView):
 
 @login_required
 def challenge_detail_view(request, pk):
+    
+    def get_client_ip(request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+            return ip
+
     challenge = get_object_or_404(Challenge, pk=pk)
     if request.method == "POST":
         input_answer = request.POST.get("answer")
         if input_answer == challenge.answer:
+            SolveLog.objects.create(user=request.user, challenge=challenge, ip=get_client_ip(request))
             challenge.solvers.add(request.user)
             return render(request, 'challenges/challenge_detail.html', {'challenge': challenge})
         else:

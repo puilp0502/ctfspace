@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 
-from .models import Challenge
+from .models import Challenge, SolveLog
 
 
 class ChallengeAdmin(ModelAdmin):
@@ -13,3 +13,4 @@ class ChallengeAdmin(ModelAdmin):
         return obj.solvers.count()
 
 admin.site.register(Challenge, ChallengeAdmin)
+admin.site.register(SolveLog)
