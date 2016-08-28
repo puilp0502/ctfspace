@@ -24,7 +24,7 @@
             </div>
         </div>
     </div>
-    <blockquote>{{ challenge.description }}</blockquote>
+    <blockquote>{{ challenge.description|safe }}</blockquote>
     {% if challenge.file %}
         <p>File: <a href="{{ challenge.file.url }}">{{ challenge.file }}</a></p>
     {% endif %}

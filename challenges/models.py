@@ -24,7 +24,7 @@ class Challenge(models.Model):
             (Misc, "MISC"),
         )
     title = models.CharField(max_length=50, null=False, unique=True, blank=False)
-    description = models.TextField()
+    description = models.TextField(help_text="HTML is supported")
     category = models.IntegerField(choices=Category.choices, default=Category.Misc)
     file = models.FileField(null=True, blank=True)
     answer = models.CharField(max_length=64)
