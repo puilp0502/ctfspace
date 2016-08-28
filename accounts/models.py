@@ -28,8 +28,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(default=timezone.now)
 
     age_type = models.IntegerField(choices=Age.CHOICES, null=False, blank=False, default=Age.OTHER)
-    name = models.CharField(max_length=10, null=False, help_text="이름")
+    name = models.CharField(max_length=20, null=False, help_text="닉네임")
     school = models.CharField(max_length=15, null=True, blank=True)
+
+    last_solved_at = models.DateTimeField(null=True, blank=True)
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['name', 'email', 'age_type']
@@ -42,13 +44,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def score(self):
         qs = User.objects.filter(pk=self.pk)\
-            .annotate(score=RawSQL("""(
-            COALESCE((SELECT SUM("challenges_challenge"."score") FROM "challenges_challenge"
-            WHERE "challenges_challenge"."id" IN
-            (SELECT "challenges_challenge_solvers"."challenge_id" FROM "challenges_challenge_solvers"
-            WHERE "challenges_challenge_solvers"."user_id" = "accounts_user"."id")), 0) +
-            COALESCE((SELECT SUM("challenges_challenge"."breakthrough_score") FROM "challenges_challenge"
-            WHERE "challenges_challenge"."breakthrough_solver_id" = "accounts_user"."id"), 0))""", ()))  # TODO: Subquery->Join
+            .annotate(score=Sum('solved__score'))
         score = qs[0].score
         if score is None:
             score = 0

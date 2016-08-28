@@ -17,4 +17,13 @@
         <li><a href="{% url 'challenge' challenge.pk %}">{{ challenge.title }}</a> was released {{ challenge.created_at|naturaltime }}.</li>
     {% endfor %}
     </ul>
+    <h5 class="page-title">NEW SOLVERS</h5>
+    <ul>
+    {% for solver in solvers %}
+        <li>
+            <a href="{% url 'accounts:user_view' solver.user.pk %}">{{ solver.user.name }}</a>
+            solved
+            <a href="{% url 'challenge' solver.challenge.pk %}">{{ solver.challenge.title }}</a> {{ solver.solved_at|naturaltime }}.</li>
+    {% endfor %}
+    </ul>
 {% endblock %}

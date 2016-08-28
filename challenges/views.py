@@ -1,7 +1,6 @@
 from django.contrib.auth.decorators import login_required
-from django.db.models.expressions import RawSQL
+from django.db.models import Sum
 from django.shortcuts import render, get_object_or_404
-from django.views.generic import DetailView
 from django.views.generic import ListView
 
 from .models import Challenge, SolveLog
@@ -10,30 +9,17 @@ from accounts.models import User
 
 def ranking(request):
     age_group = int(request.GET.get('age', 0))
-    if age_group == 0:
-        qs = User.objects
-    else:
-        qs = User.objects.filter(age_type=age_group)
-    if age_group == 3:
+    qs = User.objects.exclude(age_type=4)  # Remove Administration Account from Ranking
+    if age_group != 0:
+        qs = qs.filter(age_type=age_group)
+
+    if age_group == 3:  # Display original score for non-student competitors
         users = qs\
-            .annotate(score=RawSQL("""(
-                COALESCE((SELECT SUM("challenges_challenge"."original_score") FROM "challenges_challenge"
-                WHERE "challenges_challenge"."id" IN
-                (SELECT "challenges_challenge_solvers"."challenge_id" FROM "challenges_challenge_solvers"
-                WHERE "challenges_challenge_solvers"."user_id" = "accounts_user"."id")), 0) +
-                COALESCE((SELECT SUM("challenges_challenge"."breakthrough_score") FROM "challenges_challenge"
-                WHERE "challenges_challenge"."breakthrough_solver_id" = "accounts_user"."id"), 0))""",()))
+            .annotate(score=Sum('solved__original_score'))
     else:
         users = qs\
-            .annotate(score=RawSQL("""(
-                COALESCE((SELECT SUM("challenges_challenge"."score") FROM "challenges_challenge"
-                WHERE "challenges_challenge"."id" IN
-                (SELECT "challenges_challenge_solvers"."challenge_id" FROM "challenges_challenge_solvers"
-                WHERE "challenges_challenge_solvers"."user_id" = "accounts_user"."id")), 0) +
-                COALESCE((SELECT SUM("challenges_challenge"."breakthrough_score") FROM "challenges_challenge"
-                WHERE "challenges_challenge"."breakthrough_solver_id" = "accounts_user"."id"), 0))""", ()))\
-            # TODO: Subquery->Join
-    users = users.order_by('-score').order_by('-solve_log__solved_at')  
+            .annotate(score=Sum('solved__score'))
+    users = users.exclude(score=0).order_by('-score', 'last_solved_at')
     return render(request, 'ranking.html', {'users': users, 'age_group': age_group, 'age_types': User.Age.CHOICES[:3], 'current_age': age_group})
 
 
@@ -57,7 +43,6 @@ class ChallengeListView(ListView):
 
 @login_required
 def challenge_detail_view(request, pk):
-    
     def get_client_ip(request):
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
         if x_forwarded_for:

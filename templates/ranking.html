@@ -25,16 +25,16 @@
     <table>
     <thead>
         <tr>
-            <th>Ranking</th>
-            <th>User</th>
-            <th>Score</th>
+            <th class="num">Ranking</th>
+            <th class="name">User</th>
+            <th class="score">Score</th>
         </tr>
     </thead>
     {% for user in users %}
         <tr>
-            <td class="num">{{ forloop.counter }}</td>
-            <td class="name">{{ user.name }}</td>
-            <td class="score">{% if user.score %}{{ user.score }}{% else %}0{% endif %}</td>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ user.name }}</td>
+            <td>{% if user.score %}{{ user.score }}{% else %}0{% endif %}</td>
         </tr>
     {% endfor %}
     </table>
