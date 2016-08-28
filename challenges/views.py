@@ -1,3 +1,4 @@
+import logging
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.shortcuts import render, get_object_or_404
@@ -5,6 +6,8 @@ from django.views.generic import ListView
 
 from .models import Challenge, SolveLog
 from accounts.models import User
+
+logger = logging.getLogger('root')
 
 
 def ranking(request):
@@ -57,8 +60,12 @@ def challenge_detail_view(request, pk):
         if input_answer == challenge.answer:
             SolveLog.objects.create(user=request.user, challenge=challenge, ip=get_client_ip(request))
             challenge.solvers.add(request.user)
+            logger.info("User {} successfully solved challenge {}.".format(request.user.username, challenge.title),
+                        exc_info=False, extra={'request': request})
             return render(request, 'challenges/challenge_detail.html', {'challenge': challenge})
         else:
+            logger.info("User {} failed to solve challenge {}.".format(request.user.username, challenge.title),
+                        exc_info=False, extra={'request': request})
             return render(request, 'challenges/challenge_detail.html', {'challenge': challenge, 'error': 'Wrong Key', 'value': input_answer})
     else:
         return render(request, 'challenges/challenge_detail.html', {'challenge': challenge})
