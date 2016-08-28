@@ -56,15 +56,18 @@ def challenge_detail_view(request, pk):
 
     challenge = get_object_or_404(Challenge, pk=pk)
     if request.method == "POST":
-        input_answer = request.POST.get("answer")
-        if input_answer == challenge.answer:
-            SolveLog.objects.create(user=request.user, challenge=challenge, ip=get_client_ip(request))
-            challenge.solvers.add(request.user)
+        input_answer = request.POST.get("answer").strip()
+        if input_answer == challenge.answer.strip():
+            if not request.user.is_staff:
+                SolveLog.objects.create(user=request.user, challenge=challenge, ip=get_client_ip(request))
+                challenge.solvers.add(request.user)
             logger.info("User {} successfully solved challenge {}.".format(request.user.username, challenge.title),
                         exc_info=False, extra={'request': request})
-            return render(request, 'challenges/challenge_detail.html', {'challenge': challenge})
+            return render(request, 'challenges/challenge_detail.html', {'challenge': challenge, 'solved': True})
         else:
-            logger.info("User {} failed to solve challenge {}.".format(request.user.username, challenge.title),
+            logger.info("User {} failed to solve challenge {}(with key {}).".format(request.user.username,
+                                                                                    challenge.title,
+                                                                                    input_answer),
                         exc_info=False, extra={'request': request})
             return render(request, 'challenges/challenge_detail.html', {'challenge': challenge, 'error': 'Wrong Key', 'value': input_answer})
     else:

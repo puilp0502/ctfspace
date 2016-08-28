@@ -31,6 +31,8 @@
     <hr/>
     {% if request.user in challenge.solvers.all %}
         <p>You solved this challenge.</p>
+    {% elif request.user.is_staff and solved %}
+        <p>You solved this challenge, but it will not be saved because you're a staff.</p>
     {% else %}
         <form method="POST">
             <div class="row">
