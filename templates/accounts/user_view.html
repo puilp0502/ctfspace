@@ -1,10 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-{{ user }}
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}User {{ user.name }}{% endblock %}
+{% block body %}
+    <h4 class="page-title">{{ user.name }} - {{ user.score }} pts</h4>
+    <h5 class="page-title">Solved Challenges</h5>
+    <ul>
+    {% for challenge in user.solved.all %}
+    <p><a href="{% url 'challenge' challenge.pk %}">{{ challenge.title }}</a> - {{ challenge.score }} pts</p>
+    {% endfor %}
+    </ul>
+{% endblock %}
