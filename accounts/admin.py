@@ -25,7 +25,7 @@ class CustomUserAdmin(UserAdmin):
         }),
     )
     readonly_fields = ['score']
-
+    search_fields = ['username', 'email', 'name', 'school']
     def score(self, obj):
         return obj.score()
 
