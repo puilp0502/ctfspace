@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView
+from django.http import Http404
 
 from .models import Challenge, SolveLog
 from accounts.models import User
@@ -33,9 +34,9 @@ class ChallengeListView(ListView):
     def get_queryset(self):
         category = self.request.GET.get('category')
         if category is None:
-            return Challenge.objects.all()
+            return Challenge.objects.filter(is_hidden=False)
         else:
-            return Challenge.objects.filter(category=category)
+            return Challenge.objects.filter(is_hidden=False, category=category)
 
     def get_context_data(self, **kwargs):
         context = super(ChallengeListView, self).get_context_data(**kwargs)
@@ -55,6 +56,8 @@ def challenge_detail_view(request, pk):
             return ip
 
     challenge = get_object_or_404(Challenge, pk=pk)
+    if challenge.is_hidden:
+        raise Http404("No Challenge matches this given query")
     if request.method == "POST":
         input_answer = request.POST.get("answer").strip()
         if input_answer == challenge.answer.strip():

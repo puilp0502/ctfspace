@@ -33,6 +33,7 @@ class Challenge(models.Model):
     original_score = models.IntegerField(help_text="기본 점수")
     score = models.IntegerField(blank=True, help_text="가중치 조절된 점수: 자동조정")
     solvers = models.ManyToManyField(User, blank=True, related_name='solved')
+    is_hidden = models.BooleanField(default=True)
 
     def __str__(self):
         return "<Challenge "+self.title+">"
@@ -42,6 +43,8 @@ class Challenge(models.Model):
 def pre_save(sender, instance, *args, **kwargs):
     if not instance.score:
         instance.score = instance.original_score
+    if not instance.is_hidden:  # Update release time to revealed time
+        instance.created_at = timezone.now()
 
 
 def calculate_score(original_score, solver_count):

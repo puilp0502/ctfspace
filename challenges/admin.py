@@ -7,7 +7,7 @@ from .models import Challenge, SolveLog
 class ChallengeAdmin(ModelAdmin):
     class Meta:
         model = Challenge
-    list_display = ['title', 'category', 'score', 'solvers_count']
+    list_display = ['title', 'category', 'score', 'solvers_count', 'is_hidden']
 
     def solvers_count(self, obj):
         return obj.solvers.count()
