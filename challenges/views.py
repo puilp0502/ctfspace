@@ -4,6 +4,7 @@ from django.db.models import Sum
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView
 from django.http import Http404
+from django.urls import reverse
 
 from .models import Challenge, SolveLog
 from accounts.models import User
@@ -64,9 +65,13 @@ def challenge_detail_view(request, pk):
             if not request.user.is_staff:
                 SolveLog.objects.create(user=request.user, challenge=challenge, ip=get_client_ip(request))
                 challenge.solvers.add(request.user)
-            logger.info("User {} successfully solved challenge {}.".format(request.user.username, challenge.title),
-                        exc_info=False, extra={'request': request})
-            return render(request, 'challenges/challenge_detail.html', {'challenge': challenge, 'solved': True})
+                logger.info("User {} successfully solved challenge {}.".format(request.user.username, challenge.title),
+                            exc_info=False, extra={'request': request})
+                return render(request, 'alert.html', {'message': 'Congratulations!\nYou solved the challenge!', 'url': reverse('challenge', args=[challenge.pk])})
+            else:
+                return render(request, 'alert.html',
+                      {'message': 'You solved the problem, but it will not be saved because you\'re a staff.',
+                       'url': reverse('challenge', args=[challenge.pk])})
         else:
             logger.info("User {} failed to solve challenge {}(with key {}).".format(request.user.username,
                                                                                     challenge.title,
