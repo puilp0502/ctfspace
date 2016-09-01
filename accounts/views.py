@@ -31,7 +31,10 @@ def logout_view(request):
 class JoinView(CreateView):
     form_class = JoinForm
     template_name = 'accounts/join.html'
-    success_url = '/'  # TODO: reverse url
+
+    def form_valid(self, form):
+        return render(self.request, 'alert.html', {'message': 'Join Successful',
+                                                   'url': '/'})
 
 
 def user_view(request, pk):
