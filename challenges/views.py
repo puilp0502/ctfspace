@@ -10,20 +10,26 @@ from .models import Challenge, SolveLog
 from accounts.models import User
 
 logger = logging.getLogger('root')
-
+3.
 
 def ranking(request):
-    age_group = int(request.GET.get('age', 0))
-    qs = User.objects.exclude(age_type=4)  # Remove Administration Account from Ranking
-    if age_group != 0:
-        qs = qs.filter(age_type=age_group)
+    try:
+        age_group = int(request.GET.get('age', 0))
+    except ValueError:
+        age_group = 1
 
-    if age_group == 3:  # Display original score for non-student competitors
-        users = qs\
-            .annotate(score=Sum('solved__original_score'))
+    if not (User.Age.MIDDLE_S <= age_group <= User.Age.ADULT):
+        age_group = 1
+
+    qs = User.objects.exclude(age_type=4)  # Remove Administration Account from Ranking
+    qs = qs.filter(age_type=age_group)
+
+    if age_group == User.Age.HIGH_S:
+        users = qs.annotate(score=Sum('solved__highschool_score'))
+    elif age_group == User.Age.ADULT:
+        users = qs.annotate(score=Sum('solved__adult_score'))
     else:
-        users = qs\
-            .annotate(score=Sum('solved__score'))
+        users = qs.annotate(score=Sum('solved__middleschool_score'))
     users = users.exclude(score=0).order_by('-score', 'last_solved_at')
     return render(request, 'ranking.html', {'users': users, 'age_group': age_group, 'age_types': User.Age.CHOICES[:3], 'current_age': age_group})
 
@@ -58,7 +64,7 @@ def challenge_detail_view(request, pk):
 
     challenge = get_object_or_404(Challenge, pk=pk)
     if challenge.is_hidden:
-        raise Http404("No Challenge matches this given query")
+        raise Http404("This challenge is unavailable.")
     if request.method == "POST":
         input_answer = request.POST.get("answer").strip()
         if input_answer == challenge.answer.strip():
@@ -67,11 +73,12 @@ def challenge_detail_view(request, pk):
                 challenge.solvers.add(request.user)
                 logger.info("User {} successfully solved challenge {}.".format(request.user.username, challenge.title),
                             exc_info=False, extra={'request': request})
-                return render(request, 'alert.html', {'message': 'Congratulations!\nYou solved the challenge!', 'url': reverse('challenge', args=[challenge.pk])})
+                return render(request, 'alert.html', {'message': 'Congratulations! You solved the challenge.',
+                                                      'url': reverse('challenge', args=[challenge.pk])})
             else:
                 return render(request, 'alert.html',
-                      {'message': 'You solved the problem, but it will not be saved because you\'re a staff.',
-                       'url': reverse('challenge', args=[challenge.pk])})
+                              {'message': 'You solved the problem, but it will not be saved because you\'re a staff.',
+                               'url': reverse('challenge', args=[challenge.pk])})
         else:
             logger.info("User {} failed to solve challenge {}(with key {}).".format(request.user.username,
                                                                                     challenge.title,

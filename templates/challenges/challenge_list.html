@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load challenge_tags %}
 {% block title %}Challenges{% endblock %}
 {% block head %}
     <link rel="stylesheet" href="/static/css/challenges/list.css"
@@ -27,7 +28,7 @@
                 <div class="col hoverable center-align prob z-depth-1 {% if request.user in challenge.solvers.all %}light-blue lighten-3{% endif %}">
                     <p class="prob-category">{{ challenge.get_category_display }}</p>
                     <p class="prob-title">{{ challenge.title|upper }}</p>
-                    <p class="prob-score">{{ challenge.score }} pts</p>
+                    <p class="prob-score">{% get_challenge_score challenge request.user.age_type %} pts</p>
                 </div>
                 </a>
         {% endfor %}

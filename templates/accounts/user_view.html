@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
+{% load challenge_tags %}
 {% block title %}User {{ user.name }}{% endblock %}
 {% block body %}
     <h4 class="page-title">{{ user.name }} - {{ user.score }} pts</h4>
     <h5 class="page-title">Solved Challenges</h5>
     <ul>
     {% for challenge in user.solved.all %}
-    <p><a href="{% url 'challenge' challenge.pk %}">{{ challenge.title }}</a> - {{ challenge.score }} pts</p>
+        <p><a href="{% url 'challenge' challenge.pk %}">{{ challenge.title }}</a> - {% get_challenge_score challenge user.age_type %} pts</p>
     {% endfor %}
     </ul>
 {% endblock %}

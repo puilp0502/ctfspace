@@ -13,10 +13,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         ADULT = 3
         OTHER = 4
         CHOICES = (
-            (MIDDLE_S, "중등부"),
-            (HIGH_S, "고등부"),
-            (ADULT, "성인"),
-            (OTHER, "기타"),
+            (MIDDLE_S, "Middle School"),
+            (HIGH_S, "High School"),
+            (ADULT, "Adult"),
+            (OTHER, "Others"),
         )
 
     objects = UserManager()
@@ -43,8 +43,15 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.name
 
     def score(self):
-        qs = User.objects.filter(pk=self.pk)\
-            .annotate(score=Sum('solved__score'))
+        user = User.objects.filter(pk=self.pk)
+        if self.age_type == User.Age.MIDDLE_S:
+            qs = user.annotate(score=Sum('solved__middleschool_score'))
+        elif self.age_type == User.Age.HIGH_S:
+            qs = user.annotate(score=Sum('solved__highschool_score'))
+        elif self.age_type == User.Age.ADULT:
+            qs = user.annotate(score=Sum('solved__adult_score'))
+        else:
+            qs = user.annotate(score=Sum('solved__original_score'))
         score = qs[0].score
         if score is None:
             score = 0

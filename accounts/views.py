@@ -33,6 +33,7 @@ class JoinView(CreateView):
     template_name = 'accounts/join.html'
 
     def form_valid(self, form):
+        self.object = form.save()
         return render(self.request, 'alert.html', {'message': 'Join Successful',
                                                    'url': '/'})
 

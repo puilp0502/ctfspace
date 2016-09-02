@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load challenge_tags %}
 {% block title %} {{ challenge.title }}{% endblock %}
 {% block head %}
     <link rel="stylesheet" href="/static/css/challenges/detail.css"/>
@@ -7,9 +8,7 @@
     <h4 class="page-title">CHALLENGES</h4>
     <div class="valign-wrapper row">
         <h5 class="col s9 page-title">[{{ challenge.get_category_display | upper }}] {{ challenge.title | upper}}</h5>
-        <a class="col s3 valign right-align modal-trigger" href="#solvers">
-            {{ challenge.solvers.count }} Solver{{ challenge.solvers.count|pluralize }}
-        </a>
+        <h5 class="col s3 right-align page-title">{% get_challenge_score challenge request.user.age_type %} pts</h5>
         <div id="solvers" class="modal">
             <div class="modal-content">
                 <h4>Solver of {{ challenge.title|upper }}</h4>
@@ -24,7 +23,12 @@
             </div>
         </div>
     </div>
-    <blockquote>{{ challenge.description|safe }}</blockquote>
+    <div class="row">
+        <a class="col s3 modal-trigger" href="#solvers">
+            {{ challenge.solvers.count }} Solver{{ challenge.solvers.count|pluralize }}
+        </a>
+    </div>
+    <blockquote>{{ challenge.description|safe|linebreaksbr }}</blockquote>
     {% if challenge.file %}
         <p>File: <a href="{{ challenge.file.url }}">{{ challenge.file }}</a></p>
     {% endif %}

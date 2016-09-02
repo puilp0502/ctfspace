@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models.signals import m2m_changed, pre_save, post_save
 from django.dispatch import receiver
 from django.utils import timezone
+from django import template
 
 from accounts.models import User
 
@@ -31,7 +32,10 @@ class Challenge(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     original_score = models.IntegerField(help_text="기본 점수")
-    score = models.IntegerField(blank=True, help_text="가중치 조절된 점수: 자동조정")
+    middleschool_score = models.IntegerField(blank=True, help_text="가중치 조절된 점수: 자동조정")
+    highschool_score = models.IntegerField(blank=True, help_text="가중치 조절된 점수: 자동조정")
+    adult_score = models.IntegerField(blank=True, help_text="가중치 조절된 점수: 자동조정")
+
     solvers = models.ManyToManyField(User, blank=True, related_name='solved')
     is_hidden = models.BooleanField(default=True)
 
@@ -41,8 +45,10 @@ class Challenge(models.Model):
 
 @receiver(pre_save, sender=Challenge)
 def pre_save(sender, instance, *args, **kwargs):
-    if not instance.score:
-        instance.score = instance.original_score
+    if not instance.middleschool_score or not instance.highschool_score or not instance.adult_score:
+        instance.middleschool_score = instance.original_score
+        instance.highschool_score = instance.original_score
+        instance.adult_score = instance.original_score
     if not instance.is_hidden:  # Update release time to revealed time
         instance.created_at = timezone.now()
 
@@ -70,13 +76,24 @@ def update_score(sender, **kwargs):
     if kwargs.get('action') in ('post_add', 'post_remove'):
         if not kwargs.get('reverse'):
             challenge = kwargs.get('instance')
-            challenge.score = calculate_score(challenge.original_score, challenge.solvers.count())
+            challenge.middleschool_score = calculate_score(challenge.original_score,
+                                                           challenge.solvers.filter(age_type=User.Age.MIDDLE_S).count())
+            challenge.highschool_score = calculate_score(challenge.original_score,
+                                                           challenge.solvers.filter(age_type=User.Age.HIGH_S).count())
+            challenge.adult_score = calculate_score(challenge.original_score,
+                                                           challenge.solvers.filter(age_type=User.Age.ADULT).count())
             challenge.save()
             User.objects.filter(pk__in=kwargs.get('pk_set')).update(last_solved_at=timezone.now())
         else:
             challenges = Challenge.objects.filter(pk__in=kwargs.get('pk_set'))
             for challenge in challenges:
-                challenge.score = calculate_score(challenge.original_score, challenge.solvers.count())
+                challenge.middleschool_score = calculate_score(challenge.original_score,
+                                                               challenge.solvers.filter(age_type=User.Age.MIDDLE_S)
+                                                               .count())
+                challenge.highschool_score = calculate_score(challenge.original_score,
+                                                             challenge.solvers.filter(age_type=User.Age.HIGH_S).count())
+                challenge.adult_score = calculate_score(challenge.original_score,
+                                                        challenge.solvers.filter(age_type=User.Age.ADULT).count())
                 challenge.save()
             solver = kwargs.get('instance')
             solver.last_solved_at = timezone.now()
@@ -86,8 +103,8 @@ m2m_changed.connect(update_score, sender=Challenge.solvers.through)
 
 class SolveLog(models.Model):
     solved_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    challenge = models.ForeignKey(Challenge, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE, null=True)
     ip = models.GenericIPAddressField()
 
     def __str__(self):
