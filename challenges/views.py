@@ -10,7 +10,7 @@ from .models import Challenge, SolveLog
 from accounts.models import User
 
 logger = logging.getLogger('root')
-3.
+
 
 def ranking(request):
     try:
