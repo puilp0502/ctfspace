@@ -45,12 +45,15 @@ class Challenge(models.Model):
 
 @receiver(pre_save, sender=Challenge)
 def pre_save(sender, instance, *args, **kwargs):
-    if not instance.middleschool_score or not instance.highschool_score or not instance.adult_score:
+    try:
+        obj = sender.objects.get(pk=instance.pk)
+        if obj.is_hidden != instance.is_hidden:  # Update release time to revealed time
+            instance.created_at = timezone.now()
+    except sender.DoesNotExist:  # Newly created
         instance.middleschool_score = instance.original_score
         instance.highschool_score = instance.original_score
         instance.adult_score = instance.original_score
-    if not instance.is_hidden:  # Update release time to revealed time
-        instance.created_at = timezone.now()
+
 
 
 def calculate_score(original_score, solver_count):

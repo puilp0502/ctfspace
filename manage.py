@@ -6,7 +6,6 @@ from getpass import getuser
 if __name__ == "__main__":
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
     username = getuser()
-    settings_file = os.path.join(BASE_DIR, 'ctfspace', 'settings', 'local_{}.py'.format(username))
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ctfspace.settings.local_{}".format(username))
     try:
         from django.core.management import execute_from_command_line
@@ -26,4 +25,3 @@ if __name__ == "__main__":
                 "available on your PYTHONPATH environment variable? Did you "
                 "forget to activate a virtual environment?"
             )
-        raise
